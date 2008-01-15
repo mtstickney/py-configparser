@@ -187,7 +187,7 @@ storing any values in `config' which is modified destructively.
 This function maps from the python 'readfp()' function."
   (let ((*file-name* stream-name))
     (reading-driver config stream)
-    config )
+    config))
 
 (defun %format-value (value)
   (if (and (numberp value)
