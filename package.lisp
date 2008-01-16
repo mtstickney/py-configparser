@@ -18,6 +18,9 @@
            ;; common condition class
            #:configparser-error
 
+           ;; configuration storage type
+           #:config
+
            ;; Configuration management
            ;;  Error classes
            #:no-section-erorr

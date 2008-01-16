@@ -73,7 +73,9 @@
       ch))
 
 (defun make-input-buffer (p)
-  (make-array 20 :element-type 'cl:character :fill-pointer 0))
+  (declare (ignore p))
+  (make-array 20 :element-type 'cl:character :fill-pointer 0
+              :adjustable t))
 
 (proclaim '(inline extend-input))
 (defun extend-input (p c)
