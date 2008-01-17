@@ -262,11 +262,11 @@ When `expand' is `NIL', options are returned in raw form. Otherwise
 option values are expanded.
 
 The definition of `defaults' is the same as for `get-option'."
-  (let ((section (get-section config section-name)))
+  (let ((section (%get-section config section-name)))
     (if expand
         (mapcar #'(lambda (x)
-                    (cons (car x) (get-option p section-name
-                                              (cdr x) ;; option-name
+                    (cons (car x) (get-option config section-name
+                                              (car x) ;; option-name
                                               :expand t
                                               :defaults defaults)))
                 (section-options section))
