@@ -162,19 +162,22 @@ and some other value otherwise."
 (defun %option-value (config section option-name &key defaults)
   (if (string= option-name "__name__")
       (section-name section)
-      (let* ((norm-option-name (norm-option-name config option-name)))
-        (labels ((get-value (repositories)
-                   (when (null repositories)
-                     (error 'interpolation-missing-option-error))
-                   ;; no such option error
-                   (let ((option (has-option-p config (section-name section)
-                                               option-name)))
-                     (if option
-                         (cdr option)
+      (let* ((norm-option-name (norm-option-name config option-name))
+             (option (has-option-p config (section-name section) option-name)))
+        (if option
+          (cdr option)
+          (labels ((get-value (repositories)
+                     (when (null repositories)
+                       (error 'interpolation-missing-option-error))
+                     ;; no such option error
+                     (let ((value (assoc norm-option-name (car repositories)
+                                         :test #'string=)))
+                       (if value
+                         (cdr value)
                          (get-value (cdr repositories))))))
           (get-value (list (section-options section)
                            defaults
-                           (defaults config)))))))
+                           (defaults config))))))))
 
 ;; non-API
 (defun %expand-option-value (config section option-value defaults
@@ -234,6 +237,7 @@ key/value pairs, these values are used in the expansion of option values.
              (if expand
                  (%expand-option-value config
                                        section (cdr option)
+                                       defaults
                                        (list option-name))
                  (cdr option))))
         (cond
