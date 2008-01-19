@@ -10,7 +10,7 @@
 (defsystem py-configparser-tests
     :name "py-configparser-tests"
     :author "Erik Huelsmann"
-    :version "1.0-dev"
+    :version "1.0.1-dev"
     :license "MIT"
     :description "Tests for 'Common Lisp implementation of the Python ConfigParser module'"
     :depends-on (#:py-configparser)
