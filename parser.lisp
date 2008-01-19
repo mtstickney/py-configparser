@@ -10,9 +10,9 @@
 
 ;; The reader
 
-(proclaim '(special *line-no* *current-section* *file-name*
+(declaim '(special *line-no* *current-section* *file-name*
                     *current-input*))
-(proclaim '(inline %read-char %unread-char))
+(declaim '(inline %read-char %unread-char))
 
 (defun %read-char (stream)
   (let ((ch (read-char stream nil :eof)))
@@ -77,7 +77,7 @@
   (make-array 20 :element-type 'cl:character :fill-pointer 0
               :adjustable t))
 
-(proclaim '(inline extend-input))
+(declaim '(inline extend-input))
 (defun extend-input (p c)
   (vector-push-extend c *current-input* 20))
 
