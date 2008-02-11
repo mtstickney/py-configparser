@@ -143,7 +143,7 @@
           until (eq c :eof)
           if (eql c #\[)
           do (setf *current-section*
-                   (ensure-section p (read-section-name p s)))
+                   (section-name (ensure-section p (read-section-name p s))))
 
           else if (is-whitespace c)
           do (skip-empty-line s)
