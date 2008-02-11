@@ -1,17 +1,24 @@
 
 (cl:in-package #:py-configparser)
 
+(declaim '(special *line-no* *current-section* *file-name*
+                   *current-input*))
+
 ;; Errors for the parsing side
 
-(define-condition parsing-error (configparser-error) ())
+(define-condition parsing-error (configparser-error)
+   ((line-no :initarg :line-no :initform *line-no* :reader line)
+    (file :initarg :file :initform *file-name* :reader file)
+    (section :initarg :section :initform *current-section* :reader section)
+    (message :initarg :text :reader message))
+   (:report (lambda (c stream)
+               (format stream "~A at line ~A" (message c) (line c)))))
 (define-condition missing-section-header-error (parsing-error) ())
 
 
 
 ;; The reader
 
-(declaim '(special *line-no* *current-section* *file-name*
-                    *current-input*))
 (declaim '(inline %read-char %unread-char))
 
 (defun %read-char (stream)
@@ -69,7 +76,8 @@
             while (is-whitespace c)
             finally (setf ch c)))
     (unless (member ch expect-bag)
-      (error 'parsing-error)) ;; character ch found, but looking for EXPECT-BAG
+      ;; character ch found, but looking for EXPECT-BAG
+      (error 'parsing-error))
       ch))
 
 (defun make-input-buffer (p)
@@ -143,7 +151,7 @@
           until (eq c :eof)
           if (eql c #\[)
           do (setf *current-section*
-                   (ensure-section p (read-section-name p s)))
+                   (section-name (ensure-section p (read-section-name p s))))
 
           else if (is-whitespace c)
           do (skip-empty-line s)
