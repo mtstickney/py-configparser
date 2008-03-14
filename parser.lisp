@@ -1,8 +1,8 @@
 
 (cl:in-package #:py-configparser)
 
-(declaim '(special *line-no* *current-section* *file-name*
-                   *current-input*))
+(declaim (special *line-no* *current-section* *file-name*
+                  *current-input*))
 
 ;; Errors for the parsing side
 
@@ -19,7 +19,7 @@
 
 ;; The reader
 
-(declaim '(inline %read-char %unread-char))
+(declaim (inline %read-char %unread-char))
 
 (defun %read-char (stream)
   (let ((ch (read-char stream nil :eof)))
@@ -90,7 +90,7 @@
   (make-array 20 :element-type 'cl:character :fill-pointer 0
               :adjustable t))
 
-(declaim '(inline extend-input))
+(declaim (inline extend-input))
 (defun extend-input (p c)
   (vector-push-extend c *current-input* 20))
 
