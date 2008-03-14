@@ -1,17 +1,24 @@
 
 (cl:in-package #:py-configparser)
 
+(declaim '(special *line-no* *current-section* *file-name*
+                   *current-input*))
+
 ;; Errors for the parsing side
 
-(define-condition parsing-error (configparser-error) ())
+(define-condition parsing-error (configparser-error)
+   ((line-no :initarg :line-no :initform *line-no* :reader line)
+    (file :initarg :file :initform *file-name* :reader file)
+    (section :initarg :section :initform *current-section* :reader section)
+    (message :initarg :text :reader message))
+   (:report (lambda (c stream)
+               (format stream "~A at line ~A" (message c) (line c)))))
 (define-condition missing-section-header-error (parsing-error) ())
 
 
 
 ;; The reader
 
-(declaim '(special *line-no* *current-section* *file-name*
-                    *current-input*))
 (declaim '(inline %read-char %unread-char))
 
 (defun %read-char (stream)
@@ -44,7 +51,8 @@
   (loop for c = (%read-char s)
         if (eq c #\Newline) do (return)
         else unless (is-whitespace c)
-        do (error 'parsing-error))) ;; empty line expected
+        do (error 'parsing-error
+			:text "Non-empty line found where empty expected."))) ;; empty line expected
 
 (defun skip-to-eol (s)
   (loop for c = (%read-char s)
@@ -58,7 +66,9 @@
             while (is-whitespace c)
             finally (setf ch c)))
     (unless (eq ch expect)
-      (error 'parsing-error)) ;; character expect expected, but ch found
+      (error 'parsing-error
+		 :text (format nil "Character ~A expected, but ~A found instead."
+				       expect ch))) ;; character expect expected, but ch found
     ch))
 
 (defun expect-one-of (s expect-bag &key skip-whitespace)
@@ -69,7 +79,10 @@
             while (is-whitespace c)
             finally (setf ch c)))
     (unless (member ch expect-bag)
-      (error 'parsing-error)) ;; character ch found, but looking for EXPECT-BAG
+      ;; character ch found, but looking for EXPECT-BAG
+      (error 'parsing-error
+             :text (format nil "Character ~A found, but one of ~A expected."
+					 ch expect-bag)))
       ch))
 
 (defun make-input-buffer (p)
@@ -91,7 +104,9 @@
   (expect-char s #\[)
   (loop for c = (%read-char s)
         if (eq c #\Newline)
-        do (error 'parsing-error) ;; we can't have newlines in section names!
+        do (error 'parsing-error
+			:text "Premature end of line, or end of line in section name.")
+			;; we can't have newlines in section names!
         else if (eq c #\])
         do (progn
              (skip-to-eol s)
@@ -104,7 +119,8 @@
                (eq c #\=))
         do (let ((option-name (finalize-input p)))
              (when (= 0 (length option-name))
-               (error 'parsing-error)) ;; No option name found
+               (error 'parsing-error
+			    :text "No option name found.")) ;; No option name found
              (return option-name))
         else if (is-whitespace c)
         do (unread-char (expect-one-of s '(#\: #\=) :skip-whitespace t) s)
@@ -155,7 +171,8 @@
           do (%read-char s) ;; skip over the newline character
 
           else do (if (null *current-section*)
-                      (error 'missing-section-header-error)
+                      (error 'missing-section-header-error
+				     :text (format nil "Missing section header; found ~A instead." c))
                       (set-option p
                               *current-section*
                               (read-option-name p s)
