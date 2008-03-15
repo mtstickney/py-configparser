@@ -31,8 +31,7 @@
   (handler-case
       (%get-section config section-name)
     (no-section-error ()
-      (add-section config section-name)))
-  section-name)
+      (add-section config section-name))))
 
 (defun is-whitespace (c)
   (or (eq c #\Space)
@@ -47,7 +46,7 @@
   (loop for c = (%read-char s)
         while (is-whitespace c)))
 
-(defun skip-emtpy-line (s)
+(defun skip-empty-line (s)
   (loop for c = (%read-char s)
         if (eq c #\Newline) do (return)
         else unless (is-whitespace c)
