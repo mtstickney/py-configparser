@@ -110,6 +110,17 @@ def-option = options without trailing newline")
                  'config))
          T)
 
+;; empty lines only
+(deftest basic.empty-lines-only
+         (with-input-from-string (s "
+  
+      
+")
+           (typep (get-option read-stream (make-config) s)
+                 'config))
+         T)
+
+
 ;; options
 (deftest basic.options
   (equal (with-input-from-string (s "[n]
