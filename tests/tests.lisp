@@ -136,7 +136,9 @@ z=%(p)s
 p=q
 z=%(p)s
 ")
-           (items (read-stream (make-config) s) "n" :expand nil)) '(("z" "%(p)s") ("p" . "q")))
+           (items (read-stream (make-config) s) "n" :expand nil))
+           '(("z" . "%(p)s")
+             ("p" . "q")))
   T)
 
 (deftest basic.items.2
@@ -144,7 +146,8 @@ z=%(p)s
 p=q
 z=%(p)s
 ")
-           (items (read-stream (make-config) s) "n" :expand t)) '(("z" . "q") ("p" . "q")))
+                  (items (read-stream (make-config) s) "n" :expand t))
+                '(("z" . "q") ("p" . "q")))
   T)
 
 (deftest basic.items.3
