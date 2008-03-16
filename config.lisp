@@ -271,7 +271,7 @@ The definition of `defaults' is the same as for `get-option'."
         (mapcar #'(lambda (x)
                     (cons (car x) (get-option config section-name
                                               (car x) ;; option-name
-                                              :expand t
+                                              :expand expand
                                               :defaults defaults)))
                 (section-options section))
         (section-options section))))
