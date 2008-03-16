@@ -113,6 +113,7 @@ def-option = options without trailing newline")
 ;; empty lines only
 (deftest basic.empty-lines-only
          (with-input-from-string (s "
+# The next two lines intentionally contain spaces-only
   
       
 ")
