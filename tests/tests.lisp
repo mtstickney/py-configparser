@@ -106,7 +106,7 @@ def-option = options without trailing newline")
 
 
 ")
-           (typep (get-option read-stream (make-config) s)
+           (typep (read-stream (make-config) s)
                  'config))
          T)
 
@@ -116,7 +116,7 @@ def-option = options without trailing newline")
   
       
 ")
-           (typep (get-option read-stream (make-config) s)
+           (typep (read-stream (make-config) s)
                  'config))
          T)
 
@@ -132,7 +132,7 @@ z=%(p)s
 
 ;; items
 (deftest basic.items.1
-         (equal (with-inputfrom-string (s "[n]
+         (equal (with-input-from-string (s "[n]
 p=q
 z=%(p)s
 ")
