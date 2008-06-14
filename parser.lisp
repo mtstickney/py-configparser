@@ -190,7 +190,7 @@ The results are stored in `config' which is modified destructively.
 
 Returns as values the configuration and the list of files actually read."
   (let (files-read)
-    (dolist (filename (mapcar #'probe-file filenames)
+    (dolist (filename (remove-if-not #'probe-file filenames)
              (values config files-read))
       (with-open-file (s filename
                          :direction :input
