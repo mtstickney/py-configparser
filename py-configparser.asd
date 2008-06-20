@@ -10,7 +10,7 @@
 (defsystem py-configparser
     :name "py-configparser"
     :author "Erik Huelsmann"
-    :version "1.0.3-dev"
+    :version "1.0.4-dev"
     :license "MIT"
     :description "Common Lisp implementation of the Python ConfigParser module"
     :depends-on (#:parse-number)
