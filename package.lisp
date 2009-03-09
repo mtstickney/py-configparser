@@ -23,7 +23,7 @@
 
            ;; Configuration management
            ;;  Error classes
-           #:no-section-erorr
+           #:no-section-error
            #:duplicate-section-error
            #:no-option-error
            #:interpolation-error
