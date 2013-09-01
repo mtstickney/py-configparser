@@ -77,13 +77,16 @@
 (defun %get-option (config section-name option-name if-does-not-exist)
   (let* ((section (%get-section config section-name))
          (norm-option (norm-option-name config option-name))
-         (option (assoc norm-option
-                        (section-options section)
-                        :test #'string=)))
+         (option (or (assoc norm-option
+                            (section-options section)
+                            :test #'string=)
+                     (assoc norm-option
+                            (section-options (config-defaults config))
+                            :test #'string=))))
     (if (null option)
         (if (eq if-does-not-exist :error)
             (error 'no-option-error) ;; no such option error
-            (values (car (push (list (%validate-option-name option-name))
+            (values (car (push (list (%validate-option-name norm-option))
                                (section-options section)))
                     section))
         (values option section))))
