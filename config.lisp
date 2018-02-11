@@ -74,22 +74,20 @@
         section)))
 
 ;; non-API
-(defun %get-option (config section-name option-name if-does-not-exist)
+(defun %get-default-option (config option-name)
+  (let ((norm-option (norm-option-name config option-name)))
+    (values (assoc norm-option
+                   (section-options (config-defaults config))
+                   :test #'string=)
+            (config-defaults config))))
+
+(defun %get-option (config section-name option-name)
   (let* ((section (%get-section config section-name))
          (norm-option (norm-option-name config option-name))
-         (option (or (assoc norm-option
-                            (section-options section)
-                            :test #'string=)
-                     (assoc norm-option
-                            (section-options (config-defaults config))
-                            :test #'string=))))
-    (if (null option)
-        (if (eq if-does-not-exist :error)
-            (error 'no-option-error) ;; no such option error
-            (values (car (push (list (%validate-option-name norm-option))
-                               (section-options section)))
-                    section))
-        (values option section))))
+         (option (assoc norm-option
+                        (section-options section)
+                        :test #'string=)))
+    (values option section)))
 
 ;;
 ;; The API
@@ -133,9 +131,7 @@ If the section exists, the `duplicate-section-error' is raised."
   "Returns a generalised boolean with a value of `NIL' when
 the specified option does not exist in the specified section
 and some other value otherwise."
-  (handler-case
-      (%get-option config section-name option-name :error)
-    (no-option-error () nil)))
+  (%get-option config section-name option-name))
 
 ;; non-API
 (defun %extract-replacement (option-value)
@@ -160,7 +156,7 @@ and some other value otherwise."
                 ;; some preconditions on replacement-name
                 (error 'interpolation-syntax-error))
               (values replacement-name %-pos (1+ paren-pos))))))))
-        
+
 ;; non-API
 (defun %option-value (config section option-name &key defaults)
   (if (string= option-name "__name__")
@@ -225,7 +221,11 @@ key/value pairs, these values are used in the expansion of option values.
 `type' may be one of `:boolean', `:number' or it may remain unspecified."
   (multiple-value-bind
         (option section)
-      (%get-option config section-name option-name :error)
+      (%get-option config section-name option-name)
+    (unless option
+      (multiple-value-setq (option section) (%get-default-option config option-name)))
+    (unless option
+      (error 'no-option-error))
     (flet ((convert-boolean (v)
              (cond
                ((member v '("1" "yes" "true" "on") :test #'string=)
@@ -258,8 +258,13 @@ key/value pairs, these values are used in the expansion of option values.
 
 If the section does not exist, a `no-section-error' is raised. If the
 option does not exist, it is created."
-  (let ((option (%get-option config section-name option-name :create)))
-    (setf (cdr option) value)))
+  (let ((norm-option (norm-option-name config option-name)))
+    (multiple-value-bind (option section)
+        (%get-option config section-name option-name)
+      (unless option
+        (setf option (car (push (list (%validate-option-name norm-option))
+                                (section-options section)))))
+      (setf (cdr option) value))))
 
 (defun items (config section-name &key (expand t) defaults)
   "Returns an alist of which the items are dotted lists of key/value
@@ -283,7 +288,9 @@ The definition of `defaults' is the same as for `get-option'."
   "Remove the specified option from the given section."
   (multiple-value-bind
         (option section)
-      (%get-option config section-name option-name :error)
+      (%get-option config section-name option-name)
+    (unless option
+      (error 'no-option-error))
     (setf (section-options section)
           (remove option (section-options section)))))
 
