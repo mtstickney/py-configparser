@@ -71,6 +71,16 @@ gamma=the gamma value
          "the gamma value"))
   T)
 
+(deftest basic.get-option.6
+         (with-input-from-string (s "[DEFAULT]
+foo=%(thing)s
+
+[t]")
+           (let ((c (read-stream (make-config) s)))
+             (equal (get-option c "t" "foo" :defaults '(("thing" . "bar")))
+                    "bar")))
+  T)
+
 
 (deftest basic.sections
          (with-input-from-string (s "[n] post-section header gunk ignored
@@ -232,8 +242,19 @@ z=%(p)s
              (equal (get-option c "n" "p") "ok")))
   T)
 
+(deftest basic.set-option.2
+         (with-input-from-string (s "[DEFAULT]
+foo=1
+
+[v]
+[t]")
+           (let ((c (read-stream (make-config) s)))
+             (set-option c "v" "foo" "2")
+             (equal (get-option c "t" "foo") "1")))
+  T)
+
 ;; remove-option
-(deftest basic.remove-option
+(deftest basic.remove-option.1
          (with-input-from-string (s "[n]
 p=q
 z=%(p)s
@@ -245,6 +266,33 @@ z=%(p)s
              (when (has-option-p c "n" "p")
                (remove-option c "n" "p")
                (null (has-option-p c "n" "p")))))
+  T)
+
+(deftest basic.remove-option.2
+         (with-input-from-string (s "[DEFAULT]
+foo=1
+
+[v]")
+           (let ((c (read-stream (make-config) s)))
+             (block nil
+               (handler-case
+                   (progn
+                     (remove-option c "v" "foo")
+                     (return nil))
+                 (no-option-error () (return t))))))
+  T)
+
+(deftest basic.remove-option.3
+         (with-input-from-string (s "[DEFAULT]
+foo=1
+
+[v]
+foo=2
+
+[t]")
+           (let ((c (read-stream (make-config) s)))
+             (remove-option c "v" "foo")
+             (equal (get-option c "t" "foo") "1")))
   T)
 
 ;; remove-section
