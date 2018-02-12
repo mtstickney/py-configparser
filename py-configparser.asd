@@ -14,6 +14,7 @@
     :license "MIT"
     :description "Common Lisp implementation of the Python ConfigParser module"
     :depends-on (#:parse-number)
+    :in-order-to ((test-op (test-op #:py-configparser-tests)))
     :components ((:file "package")
                  (:file "config" :depends-on ("package"))
                  (:file "parser" :depends-on ("config"))))

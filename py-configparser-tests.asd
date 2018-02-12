@@ -13,5 +13,10 @@
     :version "1.0-dev"
     :license "MIT"
     :description "Tests for 'Common Lisp implementation of the Python ConfigParser module'"
-    :depends-on (#:py-configparser)
-    :components ((:file "tests")))
+    :depends-on (#:py-configparser #:rt)
+    :perform (test-op (o s)
+                      (funcall (find-symbol (symbol-name '#:do-tests)
+                                            (find-package '#:rt))))
+    :components ((:module "tests"
+                          :components
+                          ((:file "tests")))))
